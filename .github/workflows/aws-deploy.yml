@@ -22,7 +22,7 @@ jobs:
       - name: Build, push docker image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: aws-deploy
+          REPOSITORY: ${{ secrets.REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |-
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
@@ -30,13 +30,13 @@ jobs:
       - name: Deploy docker image to EC2
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: aws-deploy
+          REPOSITORY: ${{ secrets.REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
-          AWS_DEFAULT_REGION: ap-south-1
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }} 
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.SERVER_PUBLIC_IP }}
-          username: ubuntu
+          username: ec2-user
           key: ${{ env.PRIVATE_SSH_KEY }}
           envs: PRIVATE_SSH_KEY,REGISTRY,REPOSITORY,IMAGE_TAG,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_DEFAULT_REGION,AWS_REGION
           script: |-
